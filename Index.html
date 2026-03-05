@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ahmed AlFarra — Urban Planner & GIS Analyst</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Barlow+Condensed:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+
+<style>
+/* ════════════════════════════════════════════════════════════
+   RESET & ROOT
+════════════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#060A0F;
+  --deep:#0A1018;
+  --panel:#0F1822;
+  --border:rgba(255,255,255,0.07);
+  --borderB:rgba(255,255,255,0.12);
+  --teal:#00C9A7;
+  --teal2:#00A88D;
+  --amber:#F0A500;
+  --clay:#C16A4A;
+  --mist:rgba(200,220,230,0.55);
+  --text:#E8EEF3;
+  --dim:#6A8090;
+  --font-display:'Bebas Neue',sans-serif;
+  --font-cond:'Barlow Condensed',sans-serif;
+  --font-body:'Barlow',sans-serif;
+  --font-mono:'DM Mono',monospace;
+}
+html{scroll-behavior:smooth;font-size:15px}
+body{
+  font-family:var(--font-body);
+  background:var(--ink);
+  color:var(--text);
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* ════════════════════════════════════════════════════════════
+   CUSTOM CURSOR
+════════════════════════════════════════════════════════════ */
+.cursor{
+  position:fixed;width:12px;height:12px;border-radius:50%;
+  background:var(--teal);pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+  mix-blend-mode:screen;
+  transition:width .2s,height .2s,background .2s;
+}
+.cursor-ring{
+  position:fixed;width:36px;height:36px;border-radius:50%;
+  border:1px solid rgba(0,201,167,0.4);pointer-events:none;z-index:9998;
+  transform:translate(-50%,-50%);
+  transition:width .35s cubic-bezier(.4,0,.2,1),height .35s cubic-bezier(.4,0,.2,1),
+    border-color .35s;
+}
+body:has(a:hover) .cursor,.link-hover .cursor{width:20px;height:20px;background:var(--amber)}
+body:has(a:hover) .cursor-ring{width:56px;height:56px;border-color:rgba(240,165,0,0.5)}
+
+/* ════════════════════════════════════════════════════════════
+   GRID NOISE OVERLAY
+════════════════════════════════════════════════════════════ */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(0,201,167,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,201,167,.035) 1px,transparent 1px);
+  background-size:48px 48px;
+  pointer-events:none;z-index:0;
+}
+
+/* ════════════════════════════════════════════════════════════
+   NAV
+════════════════════════════════════════════════════════════ */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:500;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 48px;height:64px;
+  background:rgba(6,10,15,0.82);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.nav-logo{
+  font-family:var(--font-display);
+  font-size:22px;letter-spacing:.08em;
+  color:var(--text);
+  text-decoration:none;
+}
+.nav-logo span{color:var(--teal)}
+.nav-links{
+  display:flex;gap:32px;list-style:none;
+}
+.nav-links a{
+  font-family:var(--font-cond);
+  font-size:11px;font-weight:500;
+  letter-spacing:.18em;text-transform:uppercase;
+  color:var(--dim);text-decoration:none;
+  transition:color .2s;
+  cursor:none;
+}
+.nav-links a:hover{color:var(--teal)}
+.nav-cta{
+  font-family:var(--font-cond);font-size:11px;font-weight:600;
+  letter-spacing:.18em;text-transform:uppercase;
+  color:var(--ink);background:var(--teal);
+  padding:9px 20px;text-decoration:none;
+  transition:background .2s,transform .15s;
+  cursor:none;
+}
+.nav-cta:hover{background:var(--teal2);transform:translateY(-1px)}
+.mob-menu{display:none;background:none;border:none;cursor:none;color:var(--text);font-size:20px}
+
+/* ════════════════════════════════════════════════════════════
+   HERO
+════════════════════════════════════════════════════════════ */
+.hero{
+  position:relative;min-height:100vh;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:0 56px 72px;overflow:hidden;
+}
+/* Map-grid background */
+.hero-canvas{
+  position:absolute;inset:0;z-index:1;
+  opacity:.6;
+}
+.hero-overlay{
+  position:absolute;inset:0;z-index:2;
+  background:linear-gradient(
+    135deg,
+    rgba(6,10,15,0.95) 0%,
+    rgba(6,10,15,0.78) 40%,
+    rgba(0,40,50,0.5) 100%
+  );
+}
+.hero-content{position:relative;z-index:3;max-width:900px}
+.hero-eyebrow{
+  font-family:var(--font-mono);
+  font-size:10px;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--teal);margin-bottom:20px;
+  display:flex;align-items:center;gap:12px;
+  opacity:0;transform:translateY(16px);
+}
+.hero-eyebrow::before{
+  content:'';display:block;width:32px;height:1px;background:var(--teal);
+}
+.hero-name{
+  font-family:var(--font-display);
+  font-size:clamp(72px,10vw,148px);
+  line-height:.9;letter-spacing:.02em;
+  color:var(--text);
+  opacity:0;
+}
+.hero-name .line{display:block;overflow:hidden}
+.hero-name .line span{display:block}
+.hero-name .accent{color:var(--teal)}
+.hero-role{
+  font-family:var(--font-cond);
+  font-size:clamp(16px,2.2vw,24px);
+  font-weight:300;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--mist);margin-top:20px;
+  opacity:0;
+}
+.hero-stats{
+  display:flex;gap:0;margin-top:48px;
+  border-top:1px solid var(--border);
+  opacity:0;
+}
+.hero-stat{
+  padding:20px 36px 0 0;
+  border-right:1px solid var(--border);
+  margin-right:36px;
+}
+.hero-stat:last-child{border-right:none}
+.hero-stat-val{
+  font-family:var(--font-display);
+  font-size:36px;color:var(--teal);letter-spacing:.04em;
+}
+.hero-stat-lbl{
+  font-family:var(--font-mono);
+  font-size:9px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--dim);margin-top:3px;
+}
+.hero-scroll{
+  position:absolute;bottom:32px;right:56px;z-index:3;
+  font-family:var(--font-mono);font-size:9px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--dim);
+  display:flex;align-items:center;gap:12px;
+  writing-mode:vertical-rl;
+  opacity:0;
+}
+.hero-scroll::after{
+  content:'';display:block;width:1px;height:48px;background:var(--teal);
+  animation:scrollLine 2s ease-in-out infinite;
+}
+@keyframes scrollLine{0%,100%{transform:scaleY(1);opacity:1}50%{transform:scaleY(.5);opacity:.4}}
+
+/* ════════════════════════════════════════════════════════════
+   SECTIONS
+════════════════════════════════════════════════════════════ */
+section{position:relative;z-index:1}
+.section-label{
+  font-family:var(--font-mono);font-size:9px;letter-spacing:.25em;text-transform:uppercase;
+  color:var(--teal);display:flex;align-items:center;gap:10px;margin-bottom:16px;
+}
+.section-label::before{content:'//';color:var(--amber);opacity:.8}
+.section-title{
+  font-family:var(--font-display);
+  font-size:clamp(44px,6vw,80px);
+  line-height:.95;letter-spacing:.02em;color:var(--text);
+  margin-bottom:8px;
+}
+.section-title em{color:var(--teal);font-style:normal}
+
+/* ════════════════════════════════════════════════════════════
+   ABOUT
+════════════════════════════════════════════════════════════ */
+.about{
+  padding:120px 56px;
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:80px;align-items:start;
+}
+.about-left{}
+.about-bio{
+  font-size:16px;font-weight:300;line-height:1.85;
+  color:var(--mist);margin-top:28px;max-width:520px;
+}
+.about-bio strong{color:var(--text);font-weight:500}
+.about-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
+.about-tag{
+  font-family:var(--font-cond);font-size:10px;font-weight:500;
+  letter-spacing:.14em;text-transform:uppercase;
+  padding:6px 14px;border:1px solid var(--border);
+  color:var(--dim);transition:all .2s;
+}
+.about-tag:hover{border-color:var(--teal);color:var(--teal)}
+.about-right{padding-top:80px}
+.contact-block{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-top:2px solid var(--teal);
+  padding:32px;margin-bottom:2px;
+}
+.contact-row{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 0;border-bottom:1px solid var(--border);
+}
+.contact-row:last-child{border-bottom:none}
+.contact-icon{
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(0,201,167,.08);border:1px solid rgba(0,201,167,.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;flex-shrink:0;
+}
+.contact-label{
+  font-family:var(--font-mono);font-size:8.5px;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--dim);
+}
+.contact-val{
+  font-size:13px;color:var(--text);font-weight:400;
+  text-decoration:none;transition:color .2s;
+}
+a.contact-val:hover{color:var(--teal)}
+
+/* ════════════════════════════════════════════════════════════
+   SKILLS
+════════════════════════════════════════════════════════════ */
+.skills-section{padding:0 56px 120px}
+.skills-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:2px;margin-top:56px;
+}
+.skill-group{
+  background:var(--panel);border:1px solid var(--border);
+  padding:28px;
+  transition:border-color .2s;
+}
+.skill-group:hover{border-color:rgba(0,201,167,.25)}
+.skill-group-name{
+  font-family:var(--font-cond);font-size:11px;font-weight:600;
+  letter-spacing:.2em;text-transform:uppercase;
+  color:var(--teal);margin-bottom:20px;
+  padding-bottom:12px;border-bottom:1px solid var(--border);
+}
+.skill-item{margin-bottom:14px}
+.skill-item:last-child{margin-bottom:0}
+.skill-row{display:flex;justify-content:space-between;margin-bottom:5px}
+.skill-name{font-size:13px;font-weight:400;color:var(--text)}
+.skill-pct{
+  font-family:var(--font-mono);font-size:10px;color:var(--teal);
+}
+.skill-bar-bg{
+  height:2px;background:rgba(255,255,255,.06);overflow:hidden;
+}
+.skill-bar-fill{
+  height:100%;background:linear-gradient(90deg,var(--teal),var(--teal2));
+  width:0;transition:width 1.2s cubic-bezier(.4,0,.2,1);
+}
+
+/* ════════════════════════════════════════════════════════════
+   PROJECTS
+════════════════════════════════════════════════════════════ */
+.projects-section{padding:0 56px 120px}
+.projects-grid{margin-top:56px}
+.project-card{
+  display:grid;grid-template-columns:120px 1fr auto;
+  align-items:start;gap:40px;
+  padding:40px 0;border-bottom:1px solid var(--border);
+  position:relative;overflow:hidden;
+  transition:background .2s;
+  cursor:default;
+}
+.project-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:0;
+  background:linear-gradient(90deg,rgba(0,201,167,.04),transparent);
+  transition:width .4s cubic-bezier(.4,0,.2,1);
+}
+.project-card:hover::before{width:100%}
+.project-card:first-child{border-top:1px solid var(--border)}
+.project-num{
+  font-family:var(--font-display);font-size:64px;
+  color:rgba(255,255,255,.06);letter-spacing:.04em;
+  line-height:1;transition:color .3s;
+  user-select:none;
+}
+.project-card:hover .project-num{color:rgba(0,201,167,.15)}
+.project-body{}
+.project-meta{
+  font-family:var(--font-mono);font-size:9px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--dim);margin-bottom:10px;
+}
+.project-title{
+  font-family:var(--font-cond);font-size:26px;font-weight:600;
+  letter-spacing:.02em;color:var(--text);line-height:1.15;
+  margin-bottom:14px;
+}
+.project-desc{font-size:13px;font-weight:300;color:var(--mist);line-height:1.75;max-width:560px}
+.project-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.project-tag{
+  font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;
+  padding:3px 10px;background:rgba(0,201,167,.06);
+  border:1px solid rgba(0,201,167,.15);color:var(--teal);
+}
+.project-bullets{margin-top:16px;padding-left:0;list-style:none}
+.project-bullets li{
+  font-size:12px;color:var(--dim);line-height:1.7;
+  padding:3px 0 3px 16px;position:relative;
+}
+.project-bullets li::before{
+  content:'→';position:absolute;left:0;color:var(--teal);font-size:10px;
+}
+.project-cta{}
+.project-link{
+  font-family:var(--font-cond);font-size:11px;font-weight:600;
+  letter-spacing:.18em;text-transform:uppercase;
+  color:var(--teal);text-decoration:none;
+  border:1px solid rgba(0,201,167,.3);
+  padding:10px 18px;white-space:nowrap;
+  display:flex;align-items:center;gap:8px;
+  transition:all .2s;cursor:none;
+}
+.project-link:hover{background:rgba(0,201,167,.08);border-color:var(--teal)}
+.project-link svg{width:12px;height:12px}
+
+/* ════════════════════════════════════════════════════════════
+   EXPERIENCE
+════════════════════════════════════════════════════════════ */
+.experience-section{padding:0 56px 120px}
+.timeline{margin-top:56px;position:relative}
+.timeline::before{
+  content:'';position:absolute;left:160px;top:0;bottom:0;
+  width:1px;background:var(--border);
+}
+.timeline-item{
+  display:grid;grid-template-columns:160px 1fr;
+  gap:48px;padding:0 0 56px;position:relative;
+}
+.timeline-item::after{
+  content:'';position:absolute;left:156px;top:6px;
+  width:9px;height:9px;border-radius:50%;
+  background:var(--ink);border:2px solid var(--teal);
+  transition:background .2s;
+}
+.timeline-item:hover::after{background:var(--teal)}
+.timeline-date{
+  font-family:var(--font-mono);font-size:9.5px;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:var(--dim);padding-top:4px;line-height:1.5;
+  text-align:right;
+}
+.timeline-content{}
+.timeline-title{
+  font-family:var(--font-cond);font-size:20px;font-weight:600;
+  color:var(--text);letter-spacing:.02em;margin-bottom:4px;
+}
+.timeline-org{
+  font-family:var(--font-mono);font-size:9px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--teal);margin-bottom:14px;
+}
+.timeline-desc{
+  font-size:13px;font-weight:300;color:var(--mist);
+  line-height:1.8;margin-bottom:12px;
+}
+.timeline-tools{
+  font-family:var(--font-mono);font-size:10px;
+  color:var(--dim);letter-spacing:.06em;
+}
+
+/* ════════════════════════════════════════════════════════════
+   EDUCATION
+════════════════════════════════════════════════════════════ */
+.education-section{padding:0 56px 120px}
+.edu-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:2px;margin-top:56px;
+}
+.edu-card{
+  background:var(--panel);border:1px solid var(--border);
+  padding:36px;position:relative;overflow:hidden;
+  transition:border-color .3s;
+}
+.edu-card:hover{border-color:rgba(0,201,167,.3)}
+.edu-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--teal),transparent);
+}
+.edu-degree{
+  font-family:var(--font-cond);font-size:22px;font-weight:600;
+  letter-spacing:.02em;color:var(--text);margin-bottom:8px;
+}
+.edu-school{
+  font-family:var(--font-mono);font-size:9.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--teal);margin-bottom:16px;
+}
+.edu-year{
+  font-family:var(--font-display);font-size:42px;
+  color:rgba(255,255,255,.06);position:absolute;
+  bottom:16px;right:24px;letter-spacing:.04em;
+  pointer-events:none;user-select:none;
+}
+.edu-gpa{
+  display:inline-flex;align-items:baseline;gap:4px;
+  font-family:var(--font-display);font-size:32px;color:var(--amber);
+}
+.edu-gpa-label{
+  font-family:var(--font-mono);font-size:8px;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--dim);margin-top:4px;
+}
+.edu-note{
+  font-size:12px;font-weight:300;color:var(--dim);margin-top:10px;
+  font-style:italic;
+}
+
+/* ════════════════════════════════════════════════════════════
+   FOOTER / CTA BAND
+════════════════════════════════════════════════════════════ */
+.cta-band{
+  padding:100px 56px;
+  background:var(--panel);
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  gap:48px;
+}
+.cta-band-left{}
+.cta-headline{
+  font-family:var(--font-display);
+  font-size:clamp(40px,5vw,72px);
+  line-height:.95;letter-spacing:.02em;
+  color:var(--text);
+}
+.cta-headline em{color:var(--teal);font-style:normal}
+.cta-sub{
+  font-size:14px;font-weight:300;color:var(--dim);
+  margin-top:16px;max-width:440px;line-height:1.7;
+}
+.cta-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:36px}
+.btn-primary{
+  font-family:var(--font-cond);font-size:11px;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;
+  background:var(--teal);color:var(--ink);
+  padding:14px 28px;text-decoration:none;
+  transition:all .2s;cursor:none;display:inline-block;
+}
+.btn-primary:hover{background:var(--teal2);transform:translateY(-2px)}
+.btn-secondary{
+  font-family:var(--font-cond);font-size:11px;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;
+  background:transparent;color:var(--text);
+  border:1px solid var(--borderB);
+  padding:14px 28px;text-decoration:none;
+  transition:all .2s;cursor:none;display:inline-block;
+}
+.btn-secondary:hover{border-color:var(--teal);color:var(--teal)}
+.cta-band-right{flex-shrink:0;text-align:center}
+.cta-gpa{
+  font-family:var(--font-display);font-size:90px;
+  color:var(--teal);line-height:1;letter-spacing:.04em;
+}
+.cta-gpa-label{
+  font-family:var(--font-mono);font-size:9px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--dim);margin-top:6px;
+}
+footer{
+  padding:24px 56px;
+  border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.footer-note{
+  font-family:var(--font-mono);font-size:9px;
+  letter-spacing:.12em;color:var(--dim);
+}
+
+/* ════════════════════════════════════════════════════════════
+   DIVIDERS / SECTION PADDING
+════════════════════════════════════════════════════════════ */
+.section-top{
+  padding:80px 56px 0;
+  display:flex;justify-content:space-between;align-items:flex-end;
+  flex-wrap:wrap;gap:20px;
+}
+.section-count{
+  font-family:var(--font-display);font-size:80px;
+  color:rgba(255,255,255,.04);letter-spacing:.04em;
+  user-select:none;line-height:1;
+}
+
+/* ════════════════════════════════════════════════════════════
+   ANIMATED REVEAL CLASSES
+════════════════════════════════════════════════════════════ */
+.reveal{opacity:0;transform:translateY(32px)}
+.reveal-left{opacity:0;transform:translateX(-32px)}
+.reveal-scale{opacity:0;transform:scale(.95)}
+
+/* ════════════════════════════════════════════════════════════
+   MOBILE NAV DRAWER
+════════════════════════════════════════════════════════════ */
+.mob-drawer{
+  position:fixed;inset:0;z-index:600;
+  background:rgba(6,10,15,.97);
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  gap:32px;
+  transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);
+}
+.mob-drawer.open{transform:translateX(0)}
+.mob-drawer a{
+  font-family:var(--font-display);font-size:44px;letter-spacing:.04em;
+  color:var(--text);text-decoration:none;transition:color .2s;
+}
+.mob-drawer a:hover{color:var(--teal)}
+.mob-close{
+  position:absolute;top:24px;right:24px;
+  background:none;border:none;color:var(--dim);font-size:24px;cursor:none;
+}
+
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════════════════════════ */
+@media(max-width:900px){
+  nav{padding:0 24px}
+  .nav-links{display:none}
+  .mob-menu{display:block}
+  .hero{padding:0 24px 56px}
+  .hero-stat{padding-right:20px;margin-right:20px}
+  .about{grid-template-columns:1fr;gap:40px;padding:80px 24px}
+  .about-right{padding-top:0}
+  .section-top,.skills-section,.projects-section,.experience-section,.education-section{padding-left:24px;padding-right:24px}
+  .project-card{grid-template-columns:80px 1fr;gap:20px}
+  .project-num{font-size:42px}
+  .timeline::before{left:0}
+  .timeline-item{grid-template-columns:1fr;gap:8px}
+  .timeline-item::after{display:none}
+  .timeline-date{text-align:left}
+  .edu-grid{grid-template-columns:1fr}
+  .cta-band{flex-direction:column;padding:64px 24px}
+  .cta-band-right{display:none}
+  footer{padding:20px 24px;flex-direction:column;gap:8px;text-align:center}
+}
+@media(max-width:600px){
+  .hero-stats{flex-direction:column;gap:0}
+  .hero-stat{border-right:none;border-bottom:1px solid var(--border);padding:16px 0;margin:0}
+  .project-card{grid-template-columns:1fr;gap:12px}
+  .project-cta{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- CURSORS -->
+<div class="cursor" id="cur"></div>
+<div class="cursor-ring" id="curR"></div>
+
+<!-- NAV -->
+<nav id="mainNav">
+  <a class="nav-logo" href="#hero">A<span>.</span>AlFarra</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#education">Education</a></li>
+  </ul>
+  <a class="nav-cta" href="mailto:AlfarraAhmed5@gmail.com">Get In Touch</a>
+  <button class="mob-menu" onclick="toggleMob()" aria-label="menu">☰</button>
+</nav>
+
+<!-- MOBILE DRAWER -->
+<div class="mob-drawer" id="mobDrawer">
+  <button class="mob-close" onclick="toggleMob()">✕</button>
+  <a href="#about" onclick="toggleMob()">About</a>
+  <a href="#skills" onclick="toggleMob()">Skills</a>
+  <a href="#projects" onclick="toggleMob()">Projects</a>
+  <a href="#experience" onclick="toggleMob()">Experience</a>
+  <a href="#education" onclick="toggleMob()">Education</a>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     HERO
+══════════════════════════════════════════════════════════ -->
+<section class="hero" id="hero">
+  <canvas class="hero-canvas" id="heroCanvas"></canvas>
+  <div class="hero-overlay"></div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow" id="eyebrow">Urban Planner · GIS Spatial Analyst · M.Sc. AUS</div>
+
+    <h1 class="hero-name" id="heroName">
+      <span class="line"><span>AHMED</span></span>
+      <span class="line"><span class="accent">ALFARRA</span></span>
+    </h1>
+
+    <p class="hero-role" id="heroRole">
+      Spatial thinking · Sustainable cities · Data-driven design
+    </p>
+
+    <div class="hero-stats" id="heroStats">
+      <div class="hero-stat">
+        <div class="hero-stat-val" data-count="3.83">0</div>
+        <div class="hero-stat-lbl">M.Sc. GPA / AUS</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">18+</div>
+        <div class="hero-stat-lbl">GIS Maps Produced</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val" data-count="4">0</div>
+        <div class="hero-stat-lbl">Planning Projects</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">2.75y</div>
+        <div class="hero-stat-lbl">PMO Experience</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-scroll" id="heroScroll">Scroll</div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     ABOUT
+══════════════════════════════════════════════════════════ -->
+<section class="about" id="about">
+  <div class="about-left">
+    <div class="section-label reveal">Profile</div>
+    <h2 class="section-title reveal">Urban <em>Planner</em><br>& Spatial Analyst</h2>
+    <p class="about-bio reveal">
+      MSc Urban Planning graduate (<strong>GPA 3.83</strong>) specializing in GIS spatial analysis, master planning, and sustainable urban development. My background in architectural engineering provides a strong foundation in spatial systems — a career arc from architecture → infrastructure GIS → urban strategy. Independently built a <strong>Web GIS application</strong> (Leaflet.js, KML, accessibility buffers). 2.75 years PMO delivery at a regional fintech scale-up.
+    </p>
+    <div class="about-tags reveal">
+      <span class="about-tag">GIS Spatial Analysis</span>
+      <span class="about-tag">Master Planning</span>
+      <span class="about-tag">Sustainable Cities</span>
+      <span class="about-tag">Web GIS</span>
+      <span class="about-tag">Data Governance</span>
+      <span class="about-tag">Infrastructure Mapping</span>
+      <span class="about-tag">Regression Analysis</span>
+      <span class="about-tag">Heritage Preservation</span>
+    </div>
+  </div>
+
+  <div class="about-right reveal-left">
+    <div class="contact-block">
+      <div class="contact-row">
+        <div class="contact-icon">📍</div>
+        <div>
+          <div class="contact-label">Location</div>
+          <div class="contact-val">Cairo, Egypt</div>
+        </div>
+      </div>
+      <div class="contact-row">
+        <div class="contact-icon">✉️</div>
+        <div>
+          <div class="contact-label">Email</div>
+          <a class="contact-val" href="mailto:AlfarraAhmed5@gmail.com">AlfarraAhmed5@gmail.com</a>
+        </div>
+      </div>
+      <div class="contact-row">
+        <div class="contact-icon">📞</div>
+        <div>
+          <div class="contact-label">Phone</div>
+          <div class="contact-val">+20 103 659 6238</div>
+        </div>
+      </div>
+      <div class="contact-row">
+        <div class="contact-icon">🔗</div>
+        <div>
+          <div class="contact-label">LinkedIn</div>
+          <a class="contact-val" href="https://linkedin.com/in/a7medMA" target="_blank">linkedin.com/in/a7medMA</a>
+        </div>
+      </div>
+      <div class="contact-row">
+        <div class="contact-icon">🌐</div>
+        <div>
+          <div class="contact-label">Live Project</div>
+          <a class="contact-val" href="https://alfarraahmed5-afk.github.io/cairo-mosque-gis/" target="_blank">Cairo Mosque GIS →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     SKILLS
+══════════════════════════════════════════════════════════ -->
+<div class="section-top" id="skills">
+  <div>
+    <div class="section-label reveal">Expertise</div>
+    <h2 class="section-title reveal">Core <em>Skills</em></h2>
+  </div>
+  <div class="section-count">02</div>
+</div>
+<section class="skills-section">
+  <div class="skills-grid" id="skillsGrid">
+
+    <div class="skill-group reveal">
+      <div class="skill-group-name">GIS & Spatial Analysis</div>
+      <div class="skill-item"><div class="skill-row"><span class="skill-name">ArcGIS Pro</span><span class="skill-pct">92%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-w="92"></div></div></div>
+      <div class="skill-item"><div class="skill-row"><span class="skill-name">Infrastructure Mapping</span><span class="skill-pct">88%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-w="88"></div></div></div>
+      <div class="skill-item"><div class="skill-row"><span class="skill-name">Accessibility Mapping</span><span class="skill-pct">85%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-w="85"></div></div></div>
+      <div class="skill-item"><div class="skill-row"><span class="skill-name">Spatial Statistics</span><span class="skill-pct">80%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-w="80"></div></div></div>
+    </div>
+
+    <div class="skill-group reveal">
+      <div class="skill-group-name">Web GIS</div>
+      <div class="skill-item"><div class="skill-row"><span class="skill-name">Leaflet.js</span><span class="skill-pct">80%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-w="80"></div></div></div>
+      <div class="skill-item"><div class="skill-row"><span class="skill-name">KML / GeoJSON</span><span class="skill-pct">80%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-w="80"></div></div></div>
+      <div class="skill-item"><div class="skill-row"><span class="skill-name">HTML / JavaScript</span><span class="skill-pct">75%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-w="75"></div></div></div>
+    </div>
+
+    <div class="skill-group reveal">
+      <div class="skill-group-name">Urban Planning</div>
+      <div class="skill-item"><div class="skill-row"><span class="skill-name">Master Planning</span><span class="skill-pct">88%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-w="88"></div></div></div>
+      <div class="skill-item"><div class="skill-row"><span class="skill-name">Land Use & Zoning</span><span class="skill-pct">85%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-w="85"></div></div></div>
+      <div class="skill-item"><div class="skill-row"><span class="skill-name">Heritage Preservation</span><span class="skill-pct">78%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-w="78"></div></div></div>
+    </div>
+
+    <div class="skill-group reveal">
+      <div class="skill-group-name">Design & Visualization</div>
+      <div class="skill-item"><div class="skill-row"><span class="skill-name">Adobe InDesign</span><span class="skill-pct">90%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-w="90"></div></div></div>
+      <div class="skill-item"><div class="skill-row"><span class="skill-name">SketchUp & Lumion</span><span class="skill-pct">85%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-w="85"></div></div></div>
+      <div class="skill-item"><div class="skill-row"><span class="skill-name">AutoCAD</span><span class="skill-pct">85%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-w="85"></div></div></div>
+    </div>
+
+    <div class="skill-group reveal">
+      <div class="skill-group-name">Data & Analytics</div>
+      <div class="skill-item"><div class="skill-row"><span class="skill-name">SPSS / Regression</span><span class="skill-pct">80%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-w="80"></div></div></div>
+      <div class="skill-item"><div class="skill-row"><span class="skill-name">Data Governance</span><span class="skill-pct">82%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-w="82"></div></div></div>
+      <div class="skill-item"><div class="skill-row"><span class="skill-name">Technical Reporting</span><span class="skill-pct">88%</span></div><div class="skill-bar-bg"><div class="skill-bar-fill" data-w="88"></div></div></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     PROJECTS
+══════════════════════════════════════════════════════════ -->
+<div class="section-top" id="projects">
+  <div>
+    <div class="section-label reveal">Work</div>
+    <h2 class="section-title reveal">Selected <em>Projects</em></h2>
+  </div>
+  <div class="section-count">03</div>
+</div>
+<section class="projects-section">
+  <div class="projects-grid">
+
+    <div class="project-card reveal">
+      <div class="project-num">01</div>
+      <div class="project-body">
+        <div class="project-meta">Personal Project · Cairo, Egypt · 2025</div>
+        <div class="project-title">Cairo Mosque Accessibility Web GIS</div>
+        <p class="project-desc">Web GIS application mapping 40+ Cairo mosques and Metro stations for urban accessibility and transit proximity analysis.</p>
+        <ul class="project-bullets">
+          <li>Leaflet.js interactive mapping with 400m / 800m accessibility buffer zones</li>
+          <li>Mosque density heatmap + dashboard: total mapped, within 800m of metro, visit tracking</li>
+          <li>Gamified Ramadan visit-challenge (30 nights) with navigation routing and info cards</li>
+          <li>Manual KML dataset cross-referenced with satellite imagery for spatial accuracy</li>
+        </ul>
+        <div class="project-tags">
+          <span class="project-tag">Web GIS</span>
+          <span class="project-tag">Leaflet.js</span>
+          <span class="project-tag">Accessibility</span>
+          <span class="project-tag">KML</span>
+        </div>
+      </div>
+      <div class="project-cta">
+        <a class="project-link" href="https://alfarraahmed5-afk.github.io/cairo-mosque-gis/" target="_blank">
+          Live Demo
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 11L11 1M11 1H4M11 1V8"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="project-num">02</div>
+      <div class="project-body">
+        <div class="project-meta">AUS Master Planning Studio · Sharjah, UAE · 2024</div>
+        <div class="project-title">Al Khan 2040 — Waterfront Vision Plan</div>
+        <p class="project-desc">Long-range backcasting vision plan for Al Khan peninsula with seven-phase implementation framework.</p>
+        <ul class="project-bullets">
+          <li>Seven-phase implementation framework with policy instruments (AED 10K / 25K grants)</li>
+          <li>ArcGIS site suitability, accessibility mapping, constraints / opportunities analysis</li>
+          <li>Community events programme anchored in three permanent plazas</li>
+        </ul>
+        <div class="project-tags">
+          <span class="project-tag">Master Plan</span>
+          <span class="project-tag">Backcasting</span>
+          <span class="project-tag">Waterfront</span>
+          <span class="project-tag">ArcGIS</span>
+        </div>
+      </div>
+      <div class="project-cta"></div>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="project-num">03</div>
+      <div class="project-body">
+        <div class="project-meta">GIS Spatial Analysis · Austin, Texas · 2024</div>
+        <div class="project-title">Multi-Sector Workforce Distribution — Austin TX</div>
+        <p class="project-desc">18+ choropleth, dot density, and bivariate GIS maps across five professional sectors revealing spatial mismatch and employment clustering.</p>
+        <ul class="project-bullets">
+          <li>18+ maps across architecture, construction, arts, healthcare, computer science</li>
+          <li>Bivariate 2×2 matrix revealing occupational spatial segregation patterns</li>
+          <li>Identified housing-workforce mismatch and creative-tech bifurcation in Austin</li>
+        </ul>
+        <div class="project-tags">
+          <span class="project-tag">GIS</span>
+          <span class="project-tag">Choropleth</span>
+          <span class="project-tag">Bivariate</span>
+          <span class="project-tag">Spatial Analysis</span>
+        </div>
+      </div>
+      <div class="project-cta"></div>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="project-num">04</div>
+      <div class="project-body">
+        <div class="project-meta">M.Sc. Quantitative Methods · National Dataset · 2024</div>
+        <div class="project-title">VMT Regression Analysis — NHTS</div>
+        <p class="project-desc">OLS regression on 12,507 NHTS households identifying determinants of household vehicle miles travelled.</p>
+        <ul class="project-bullets">
+          <li>Final model R²=0.20, F(8,328)=10.25, p&lt;.001</li>
+          <li>Four significant predictors: household size (β=+0.22), vehicles (β=+0.20), cycling (β=−0.14), job-pop balance (β=−0.11)</li>
+          <li>Policy implications: vehicle ownership reduction & cycling investment are highest-leverage interventions</li>
+        </ul>
+        <div class="project-tags">
+          <span class="project-tag">Regression</span>
+          <span class="project-tag">SPSS</span>
+          <span class="project-tag">Transportation</span>
+          <span class="project-tag">NHTS</span>
+        </div>
+      </div>
+      <div class="project-cta"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     EXPERIENCE
+══════════════════════════════════════════════════════════ -->
+<div class="section-top" id="experience">
+  <div>
+    <div class="section-label reveal">Career</div>
+    <h2 class="section-title reveal"><em>Experience</em></h2>
+  </div>
+  <div class="section-count">04</div>
+</div>
+<section class="experience-section">
+  <div class="timeline">
+
+    <div class="timeline-item reveal">
+      <div class="timeline-date">Jul – Sep 2025</div>
+      <div class="timeline-content">
+        <div class="timeline-title">GIS & Infrastructure Analyst</div>
+        <div class="timeline-org">SEWA — Sharjah Electricity, Water & Gas Authority · Sharjah, UAE</div>
+        <p class="timeline-desc">Modernized electricity-grid geospatial datasets using ArcGIS. Developed data-validation protocols and QA frameworks. Established data-governance standards across multi-department teams.</p>
+        <div class="timeline-tools">ArcGIS (Advanced) · Data Validation & QA · Infrastructure Mapping</div>
+      </div>
+    </div>
+
+    <div class="timeline-item reveal">
+      <div class="timeline-date">Oct 2022 – Jun 2025</div>
+      <div class="timeline-content">
+        <div class="timeline-title">Assistant Manager — PMO, Operations & Process Excellence</div>
+        <div class="timeline-org">Network International · Dubai, UAE</div>
+        <p class="timeline-desc">Designed governance frameworks supporting operational compliance across enterprise portfolios. Delivered 20% operational efficiency gain. Developed executive dashboards and operational reports.</p>
+        <div class="timeline-tools">JIRA · SailPoint · Governance & Compliance · Progress Reporting</div>
+      </div>
+    </div>
+
+    <div class="timeline-item reveal">
+      <div class="timeline-date">Dec 2021 – May 2022</div>
+      <div class="timeline-content">
+        <div class="timeline-title">Freelance Architect & Project Coordinator</div>
+        <div class="timeline-org">Multi-Stakeholder Consultancies · Gaza / Dubai</div>
+        <p class="timeline-desc">Led architectural design delivery for residential developments. Managed municipal-approval cycles and cross-disciplinary teams.</p>
+        <div class="timeline-tools">AutoCAD · SketchUp · Adobe Suite · Municipal Coordination</div>
+      </div>
+    </div>
+
+    <div class="timeline-item reveal">
+      <div class="timeline-date">Jul – Dec 2021</div>
+      <div class="timeline-content">
+        <div class="timeline-title">Junior Architect & Design Professional</div>
+        <div class="timeline-org">Al Jazeera Architects · Gaza City, Palestine</div>
+        <p class="timeline-desc">Produced floor plans, construction documentation, and 3D visualizations. Conducted post-conflict structural assessments for NGO-led reconstruction projects.</p>
+        <div class="timeline-tools">SketchUp · Lumion · AutoCAD · Adobe Photoshop</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     EDUCATION
+══════════════════════════════════════════════════════════ -->
+<div class="section-top" id="education">
+  <div>
+    <div class="section-label reveal">Academic</div>
+    <h2 class="section-title reveal"><em>Education</em></h2>
+  </div>
+  <div class="section-count">05</div>
+</div>
+<section class="education-section">
+  <div class="edu-grid">
+
+    <div class="edu-card reveal">
+      <div class="edu-degree">M.Sc. Urban Planning</div>
+      <div class="edu-school">American University of Sharjah, UAE</div>
+      <div class="edu-gpa">3.83 <span style="font-size:16px;color:var(--dim)">/&nbsp;4.00</span></div>
+      <div class="edu-gpa-label">GPA — Distinction</div>
+      <div class="edu-note">Sustainable Urban Development & Strategic Planning</div>
+      <div class="edu-year">2025</div>
+    </div>
+
+    <div class="edu-card reveal">
+      <div class="edu-degree">B.Sc. Architectural Engineering</div>
+      <div class="edu-school">Islamic University of Gaza, Palestine</div>
+      <div style="height:16px"></div>
+      <div class="edu-note">Sustainable Architecture & Environmental Design</div>
+      <div class="edu-year">2021</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     CTA BAND
+══════════════════════════════════════════════════════════ -->
+<div class="cta-band reveal">
+  <div class="cta-band-left">
+    <h2 class="cta-headline">Let's build<br><em>better cities</em><br>together.</h2>
+    <p class="cta-sub">Open to GIS analyst, urban planning, and spatial data roles. Based in Cairo — available globally.</p>
+    <div class="cta-actions">
+      <a class="btn-primary" href="mailto:AlfarraAhmed5@gmail.com">Send a Message</a>
+      <a class="btn-secondary" href="https://linkedin.com/in/a7medMA" target="_blank">LinkedIn Profile →</a>
+    </div>
+  </div>
+  <div class="cta-band-right">
+    <div class="cta-gpa">3.83</div>
+    <div class="cta-gpa-label">M.Sc. GPA · AUS</div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-note">© 2025 Ahmed AlFarra — Urban Planner & GIS Analyst</div>
+  <div class="footer-note">Cairo, Egypt · AlfarraAhmed5@gmail.com</div>
+</footer>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// CURSOR
+// ════════════════════════════════════════════════════════════
+const cur = document.getElementById('cur');
+const curR = document.getElementById('curR');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
+function animCursor(){
+  cur.style.left=mx+'px'; cur.style.top=my+'px';
+  rx+=(mx-rx)*.12; ry+=(my-ry)*.12;
+  curR.style.left=rx+'px'; curR.style.top=ry+'px';
+  requestAnimationFrame(animCursor);
+}
+animCursor();
+// Hide on touch devices
+if(window.matchMedia('(pointer:coarse)').matches){
+  cur.style.display='none'; curR.style.display='none';
+  document.body.style.cursor='auto';
+}
+
+// ════════════════════════════════════════════════════════════
+// HERO CANVAS — animated city grid
+// ════════════════════════════════════════════════════════════
+(function(){
+  const canvas = document.getElementById('heroCanvas');
+  const ctx = canvas.getContext('2d');
+  let W,H,nodes=[],t=0;
+
+  function resize(){
+    W=canvas.width=canvas.offsetWidth;
+    H=canvas.height=canvas.offsetHeight;
+    buildNodes();
+  }
+
+  function buildNodes(){
+    nodes=[];
+    const cols=Math.floor(W/60)+2, rows=Math.floor(H/60)+2;
+    for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
+      nodes.push({
+        x:c*60,y:r*60,
+        ox:c*60,oy:r*60,
+        vx:(Math.random()-.5)*.4,
+        vy:(Math.random()-.5)*.4,
+        active:Math.random()>.7
+      });
+    }
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    t+=.008;
+
+    // Move nodes gently
+    nodes.forEach(n=>{
+      n.x=n.ox+Math.sin(t+n.oy*.02)*8;
+      n.y=n.oy+Math.cos(t+n.ox*.02)*6;
+    });
+
+    // Draw edges
+    const cols=Math.floor(W/60)+2;
+    nodes.forEach((n,i)=>{
+      if(n.active){
+        // right
+        const nr=nodes[i+1];
+        if(nr&&nr.active&&Math.floor(i/cols)===Math.floor((i+1)/cols)){
+          const a=.08+.04*Math.sin(t+i*.1);
+          ctx.strokeStyle=`rgba(0,201,167,${a})`;
+          ctx.lineWidth=.8;
+          ctx.beginPath();ctx.moveTo(n.x,n.y);ctx.lineTo(nr.x,nr.y);ctx.stroke();
+        }
+        // down
+        const nd=nodes[i+cols];
+        if(nd&&nd.active){
+          const a=.06+.03*Math.sin(t+i*.15);
+          ctx.strokeStyle=`rgba(0,201,167,${a})`;
+          ctx.lineWidth=.8;
+          ctx.beginPath();ctx.moveTo(n.x,n.y);ctx.lineTo(nd.x,nd.y);ctx.stroke();
+        }
+        // dot
+        const pulse=.3+.25*Math.sin(t*2+i*.3);
+        ctx.fillStyle=`rgba(0,201,167,${pulse})`;
+        ctx.beginPath();ctx.arc(n.x,n.y,1.2,0,Math.PI*2);ctx.fill();
+      }
+    });
+
+    // Scanning line
+    const scanY=(Math.sin(t*.3)+1)/2*H;
+    const scanGrad=ctx.createLinearGradient(0,scanY-60,0,scanY+60);
+    scanGrad.addColorStop(0,'transparent');
+    scanGrad.addColorStop(.5,'rgba(0,201,167,.06)');
+    scanGrad.addColorStop(1,'transparent');
+    ctx.fillStyle=scanGrad;
+    ctx.fillRect(0,scanY-60,W,120);
+
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize',resize);
+  resize();
+  draw();
+})();
+
+// ════════════════════════════════════════════════════════════
+// GSAP HERO ENTRANCE
+// ════════════════════════════════════════════════════════════
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+const tl = gsap.timeline({delay:.3});
+tl.to('#eyebrow',{opacity:1,y:0,duration:.7,ease:'power3.out'})
+  .to('.hero-name .line span',{
+    y:0,opacity:1,duration:1,ease:'expo.out',stagger:.12,
+    from:{y:100,opacity:0}
+  },.3)
+  .to('#heroRole',{opacity:1,y:0,duration:.8,ease:'power2.out'},.8)
+  .to('#heroStats',{opacity:1,y:0,duration:.7,ease:'power2.out'},1.0)
+  .to('#heroScroll',{opacity:1,duration:.6},1.4);
+
+// Animate hero name lines from bottom
+gsap.set('.hero-name .line span',{y:110,opacity:0});
+
+// ════════════════════════════════════════════════════════════
+// SCROLL REVEALS
+// ════════════════════════════════════════════════════════════
+gsap.utils.toArray('.reveal').forEach(el=>{
+  gsap.fromTo(el,
+    {opacity:0,y:40},
+    {opacity:1,y:0,duration:.9,ease:'power3.out',
+      scrollTrigger:{trigger:el,start:'top 88%',toggleActions:'play none none none'}}
+  );
+});
+gsap.utils.toArray('.reveal-left').forEach(el=>{
+  gsap.fromTo(el,
+    {opacity:0,x:-40},
+    {opacity:1,x:0,duration:.9,ease:'power3.out',
+      scrollTrigger:{trigger:el,start:'top 88%',toggleActions:'play none none none'}}
+  );
+});
+
+// ════════════════════════════════════════════════════════════
+// SKILL BARS ANIMATE ON SCROLL
+// ════════════════════════════════════════════════════════════
+document.querySelectorAll('.skill-bar-fill').forEach(bar=>{
+  const target = bar.dataset.w + '%';
+  ScrollTrigger.create({
+    trigger:bar,start:'top 90%',once:true,
+    onEnter:()=>{ bar.style.width=target; }
+  });
+});
+
+// ════════════════════════════════════════════════════════════
+// COUNTER ANIMATION
+// ════════════════════════════════════════════════════════════
+document.querySelectorAll('[data-count]').forEach(el=>{
+  const target = parseFloat(el.dataset.count);
+  const isFloat = el.dataset.count.includes('.');
+  ScrollTrigger.create({
+    trigger:el,start:'top 85%',once:true,
+    onEnter:()=>{
+      gsap.fromTo({v:0},{v:target},{
+        duration:1.8,ease:'power2.out',
+        onUpdate:function(){
+          el.textContent = isFloat
+            ? this.targets()[0].v.toFixed(2)
+            : Math.round(this.targets()[0].v);
+        }
+      });
+    }
+  });
+});
+
+// ════════════════════════════════════════════════════════════
+// SMOOTH SCROLL NAV
+// ════════════════════════════════════════════════════════════
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    e.preventDefault();
+    const id=a.getAttribute('href');
+    gsap.to(window,{scrollTo:{y:id,offsetY:64},duration:.9,ease:'power3.inOut'});
+  });
+});
+
+// ════════════════════════════════════════════════════════════
+// MOBILE MENU
+// ════════════════════════════════════════════════════════════
+function toggleMob(){
+  document.getElementById('mobDrawer').classList.toggle('open');
+}
+
+// ════════════════════════════════════════════════════════════
+// NAV SHRINK ON SCROLL
+// ════════════════════════════════════════════════════════════
+const mainNav = document.getElementById('mainNav');
+ScrollTrigger.create({
+  start:100,
+  onUpdate:self=>{
+    mainNav.style.borderBottomColor=self.progress>0
+      ?'rgba(0,201,167,.15)':'rgba(255,255,255,.07)';
+  }
+});
+
+// ════════════════════════════════════════════════════════════
+// PROJECT CARD HOVER
+// ════════════════════════════════════════════════════════════
+document.querySelectorAll('.project-card').forEach(card=>{
+  card.addEventListener('mouseenter',()=>{
+    gsap.to(card.querySelector('.project-num'),{color:'rgba(0,201,167,.2)',duration:.3});
+  });
+  card.addEventListener('mouseleave',()=>{
+    gsap.to(card.querySelector('.project-num'),{color:'rgba(255,255,255,.06)',duration:.3});
+  });
+});
+</script>
+</body>
+</html>
